@@ -2,11 +2,10 @@ CFLAGS = -std=c99 -g -Wall -Wshadow --pedantic -Wvla -Werror
 COVFLAGS = -fprofile-arcs -ftest-coverage
 PROFFLAG = -pg
 GCC = gcc $(CFLAGS) #$(COVFLAGS) $(PROFFLAG)
-OBJS = headers.o master.o
-HEADERS = headers.h
+OBJS = headers.o master.o debug.o
+HEADERS = headers.h debug.h
 
-makeall: $(OBJS)
-	$(GCC) -c $(OBJS) -o core.o
+makeall:$(OBJS)
 
 .c.o: $(HEADERS)
 	$(GCC) -c $*.c

@@ -2,15 +2,15 @@ CFLAGS = -std=c99 -g -Wall -Wshadow --pedantic -Wvla -Werror
 COVFLAGS = -fprofile-arcs -ftest-coverage
 PROFFLAG = -pg
 GCC = gcc $(CFLAGS) #$(COVFLAGS) $(PROFFLAG)
-PARTS = core
-PARTNAME = headers.o master.o
+#PARTNAME = ./core/headers.o ./core/master.o ./core/debug.o
+PARTNAME = $(wildcard */*.o)
 
 make:
-	$(GCC) $(PARTS) -o FileChanger
+	cd core; make makeall
+	$(GCC) $(PARTNAME) -o FileChanger
 
-core:
-	+$(MAKE) -C core
-
-clean: 
+clean:
 	/bin/rm -f *.o
 	/bin/rm -f *.out
+	/bin/rm -f FileChanger
+	cd core;make clean
