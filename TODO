@@ -1,0 +1,3 @@
+Change main to have a read RIFF Header, read FMTHeader, read Dataheader
+validates in read for obvious stuff.
+rename core.h to something like headers.h
