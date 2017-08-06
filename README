@@ -1,0 +1,3 @@
+This project is to write a sound format called .greg. 
+The current implimentation is to change a .wav file to a .greg file and back again.
+It is planned to have a codec to actively play a .greg.
