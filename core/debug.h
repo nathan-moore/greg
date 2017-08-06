@@ -3,7 +3,7 @@
 
 #include "headers.h"
 
-void printRIFF(RIFFMHeader* head);
+void printRIFF(RIFFHeader* head);
 
 
 #endif

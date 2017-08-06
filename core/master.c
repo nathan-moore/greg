@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "headers.h"
 #include "debug.h"
@@ -13,14 +14,15 @@ int main(int argc,char** argv)
 		fprintf(stdout,"Error, please use ./function fileIn.wav fileOut.greg\n");
 	}
 
-	FILE* file_read = fopen(argv[2],"r");
+	FILE* file_read = fopen(argv[1],"r");
 	if(file_read == NULL)
 	{
-		fprintf(stdout,"Error opening file\n");
+	    int error = errno;
+		fprintf(stdout,"Error opening file. Error %i\n",error);
 		return EXIT_FAILURE;
 	}
 	
-	RIFFMHeader* header_first;
+	RIFFHeader* header_first;
 	int error = readRIFF(&header_first,file_read);
 
 	if(DEBUG == 1 && error == 1)

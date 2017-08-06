@@ -11,13 +11,8 @@ typedef struct PACKED RIFFHeader{
 	uint32_t format;   //should be WAVE
 }RIFFHeader;
 
-typedef struct PACKED RIFFMHeader{
-	RIFFHeader header;
-	size_t waveChunks;//can be variable length; 
-}RIFFMHeader;
-
 typedef struct PACKED FMTHeader{
-	uint32_t subchunk1ID;//should be "fmt"
+	uint32_t subchunk1ID;//should be "fmt\0"
 	uint32_t chunkSize;//size of the subchunk following this.16 for PCM
 	uint16_t audioFormat;//PCM = 1. Others not supported yet
 	uint16_t numChannels;
@@ -32,7 +27,7 @@ typedef struct PACKED dataHeader{
 	uint32_t subChunk2Size;//Equal to numSamples * numChannels * bitsPerSample / 8
 }dataHeader;
 
-int readRIFF(RIFFMHeader** header,FILE* Fin);
+int readRIFF(RIFFHeader** header,FILE* Fin);
 
 
 
