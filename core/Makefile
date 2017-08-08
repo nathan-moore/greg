@@ -7,7 +7,7 @@ HEADERS = headers.h debug.h
 
 makeall:$(OBJS)
 
-.c.o: $(HEADERS)
+%.o: $(HEADERS) %.c
 	$(GCC) -c $*.c
 
 clean: 
