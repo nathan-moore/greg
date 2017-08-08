@@ -21,74 +21,21 @@ int main(int argc,char** argv)
 		fprintf(stderr,"Error opening file. Error %i\n",error);
 		return EXIT_FAILURE;
 	}
-	
-	RIFFHeader* RIFFHead;
-	int error = readRIFF(&RIFFHead,file_read);
+
+	//reads three headers in and does simple header validation
+	waveHeaders* waveHead = readWHeaders(file_read);
+	if(waveHead == NULL)
+	{
+		return EXIT_FAILURE;
+	}
 
 	if(DEBUG == 1)
 	{
-		printRIFF(RIFFHead);
+		printRIFF(waveHead -> RIFFHead);
+		printFMT(waveHead -> FMTHead);
+		printData(waveHead -> dataHead);
 	}
-
-	if(error != 0)
-	{
-		fprintf(stderr,"The error code is %i\n",error);
-
-		free(RIFFHead);
-		return EXIT_FAILURE;
-	}
-
-	FMTHeader* FMTHead;
-	error = readFMT(&FMTHead,file_read);
-	if(DEBUG == 1)
-	{
-		printFMT(FMTHead);
-	}
-	if(error != 0)
-	{
-		fprintf(stderr,"The error code for FMT is %i\n",error);
-		free(FMTHead);
-		free(RIFFHead);
-		return EXIT_FAILURE;
-	}
-
-	error = skip(file_read,"data",4);
-	if(error != 0)
-	{
-		fprintf(stderr,"The error code for skipping is %i\n",error);
-		free(RIFFHead);
-		free(FMTHead);
-		return EXIT_FAILURE;
-	}
-
-	dataHeader* dataHead = malloc(sizeof(dataHeader));
-	if(dataHead == NULL)
-	{
-		fprintf(stderr,"malloc failure\n");
-		free(RIFFHead);
-		free(FMTHead);
-		return EXIT_FAILURE;
-	}
-
-	error = readData(&dataHead,file_read);
-
-	if(DEBUG == 1)
-	{
-		printData(dataHead);
-	}
-	
-	if(error != 0)
-	{
-		fprintf(stderr,"Error with readData, Error code: %i\n",error);
-		free(RIFFHead);
-		free(FMTHead);
-		free(dataHead);
-		return EXIT_FAILURE;
-	}
-
-	
-	free(dataHead);
-	free(RIFFHead);
-	free(FMTHead);
+   
+	freeWHead(waveHead);
 	fclose(file_read);
 }

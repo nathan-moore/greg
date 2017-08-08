@@ -1,3 +1,5 @@
-Change main to have a read RIFF Header, read FMTHeader, read Dataheader
-validates in read for obvious stuff.
-rename core.h to something like headers.h
+read data from file and store in temp
+average or roof audio data
+write back to file
+make .greg header
+

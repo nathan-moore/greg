@@ -145,3 +145,87 @@ int readData(dataHeader** head,FILE* fin)
 
 	return 0;
 }
+
+waveHeaders* initWHead()
+{
+	waveHeaders* rtn = malloc(sizeof(waveHeaders));
+	if(rtn == NULL)
+	{
+		return NULL;
+	}
+
+	rtn -> RIFFHead = NULL;
+	rtn -> FMTHead = NULL;
+	rtn -> dataHead = NULL;
+
+	return rtn;
+}
+
+void freeWHead(waveHeaders* head)
+{
+	if(head -> RIFFHead != NULL)
+	{
+		free(head -> RIFFHead);
+	}
+	
+	if(head -> FMTHead != NULL)
+	{
+		free(head -> FMTHead);
+	}
+	
+	if(head -> dataHead != NULL)
+	{
+		free(head -> dataHead);
+	}
+
+	free(head);
+	
+	return;
+}
+
+waveHeaders* readWHeaders(FILE* fin)
+{
+	waveHeaders* waveHead = initWHead();
+	if(waveHead == NULL)
+	{
+		return NULL;
+
+	}
+
+	int error = readRIFF(&(waveHead -> RIFFHead),fin);
+	if(error != 0)
+	{
+		fprintf(stderr,"The error code for RIFF is %i\n",error);
+		freeWHead(waveHead);
+		return NULL;
+	}
+
+	
+	error = readFMT(&(waveHead -> FMTHead),fin);
+	if(error != 0)
+	{
+		fprintf(stderr,"The error code for FMT is %i\n",error);
+		freeWHead(waveHead);
+		return NULL;
+	}
+
+	
+	error = skip(fin,"data",4);
+	if(error != 0)
+	{
+		fprintf(stderr,"The error code for skipping is %i\n",error);
+		freeWHead(waveHead);
+		return NULL;
+	}
+
+	
+	error = readData(&(waveHead -> dataHead),fin);
+	if(error != 0)
+	{
+		fprintf(stderr,"The error code for data is %i\n",error);
+	    freeWHead(waveHead);
+		return NULL;
+	}
+
+	return waveHead;
+}
