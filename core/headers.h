@@ -4,6 +4,7 @@
 #define PACKED __attribute__((packed))
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct PACKED RIFFHeader{
 	uint32_t chunkID;  //should be RIFF in ascii
@@ -12,7 +13,7 @@ typedef struct PACKED RIFFHeader{
 }RIFFHeader;
 
 typedef struct PACKED FMTHeader{
-	uint32_t subchunk1ID;//should be "fmt\0"
+	uint32_t subchunk1ID;//should be "fmt "
 	uint32_t chunkSize;//size of the subchunk following this.16 for PCM
 	uint16_t audioFormat;//PCM = 1. Others not supported yet
 	uint16_t numChannels;
@@ -49,9 +50,14 @@ int readData(dataHeader** head,FILE* fin);
 //skips the data stream fin until the next n chars read match match
 int skip(FILE* fin,const char* match,int n);
 
+//initiates struct to hold all the headers
 waveHeaders* initWHead();
+
+//frees WHead struct and all initialized headers
 void freeWHead(waveHeaders* head);
 
+//returns true if correctly formated
+bool validateHeads(waveHeaders* head,FILE* fin);
 
 
 

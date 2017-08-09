@@ -35,7 +35,16 @@ int main(int argc,char** argv)
 		printFMT(waveHead -> FMTHead);
 		printData(waveHead -> dataHead);
 	}
-   
+
+	if(!validateHeads(waveHead,file_read))
+	{
+		freeWHead(waveHead);
+		fprintf(stdout,"Error parsing file\n");
+		return EXIT_FAILURE;
+	}
+
+	
+	
 	freeWHead(waveHead);
 	fclose(file_read);
 }

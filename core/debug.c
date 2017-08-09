@@ -6,7 +6,7 @@
 void printRIFF(RIFFHeader* head)
 {
 	fprintf(stdout,"The chunk id is %i\n",(head -> chunkID));
-	fprintf(stdout,"The chunkSize is %i\n",(head -> chunkID));
+	fprintf(stdout,"The chunkSize is %i\n",(head -> chunkSize));
 	fprintf(stdout,"The format is %i\n\n",(head -> format));
 }
 

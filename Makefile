@@ -3,7 +3,7 @@ COVFLAGS = -fprofile-arcs -ftest-coverage
 PROFFLAG = -pg
 GCC = gcc $(CFLAGS) #$(COVFLAGS) $(PROFFLAG)
 
-make:
+make:clean
 	make -C core makeall
 	FILES="$(shell echo ./*/*.[o])";$(GCC) $$FILES -o FileChanger
 
