@@ -4,8 +4,12 @@
 
 #include "headers.h"
 #include "debug.h"
+#include "readAudio.h"
+#include "greg.h"
 
 #define DEBUG 1
+
+void freeFiles(FILE** tofree,int channels);
 
 int main(int argc,char** argv)
 {
@@ -22,10 +26,21 @@ int main(int argc,char** argv)
 		return EXIT_FAILURE;
 	}
 
+	FILE* f_out = fopen(argv[2],"w");
+	if(f_out == NULL)
+	{
+		int error = errno;
+		fclose(file_read);
+		fprintf(stderr,"Error opeing file. Error: %i\n",error);
+		return EXIT_FAILURE;
+	}
+	
 	//reads three headers in and does simple header validation
 	waveHeaders* waveHead = readWHeaders(file_read);
 	if(waveHead == NULL)
 	{
+		fclose(file_read);
+		fclose(f_out);
 		return EXIT_FAILURE;
 	}
 
@@ -39,12 +54,110 @@ int main(int argc,char** argv)
 	if(!validateHeads(waveHead,file_read))
 	{
 		freeWHead(waveHead);
+		fclose(file_read);
+		fclose(f_out);
 		fprintf(stdout,"Error parsing file\n");
 		return EXIT_FAILURE;
 	}
 
+	//opens up a file stream for each channel
+	//allocates the containing array
+	FILE** f_channels = malloc(sizeof(FILE*) * (waveHead -> FMTHead -> numChannels));
+	if(f_channels == NULL)
+	{
+		freeWHead(waveHead);
+		fclose(file_read);
+		fclose(f_out);
+		fprintf(stdout,"Error opening channel data\n");
+		return EXIT_FAILURE;
+	}
+
+	//opens channel - 1 streams and stores them
+	for(int i = 0,limit = waveHead -> FMTHead -> numChannels - 1;i < limit;i++)
+	{
+		f_channels[i] = fopen(argv[1],"r");
+		if(f_channels[i] == NULL)
+		{
+			//gets why the file open would have failed
+			int error = errno;
+			for(int j = 0;j < i;j++)
+			{
+				fclose(f_channels[i]);
+			}
+			fprintf(stdout,"Error opening channel data\n");
+			fprintf(stderr,"errno error: %i\n",error);
+			fclose(file_read);\
+			fclose(f_out);
+			free(f_channels);
+			freeWHead(waveHead);
+			return EXIT_FAILURE;
+		}
+	}
+	//uses the already open file stream for the last stream
+	f_channels[waveHead -> FMTHead -> numChannels - 1] = file_read;
+
+	//opens up a stream for the audio
+	audio* Astream;
+	samples* dataIn = aOpen(waveHead,f_channels,&Astream);
+	if(dataIn == NULL)
+	{
+		freeFiles(f_channels,waveHead -> FMTHead -> numChannels);
+		freeWHead(waveHead);
+		fclose(f_out);
+		fprintf(stdout,"error opening audio data\n");
+		return EXIT_FAILURE;
+	}
+
+	greg* Gtmp = initGreg(dataIn);
+	if(Gtmp == NULL)
+	{
+		freeFiles(f_channels,waveHead -> FMTHead -> numChannels);
+		freeWHead(waveHead);
+		fclose(f_out);
+		freeAudio(Astream);
+		fprintf(stdout,"error converting to .greg\n");
+		return EXIT_FAILURE;
+	}
 	
+	int status;//used to store the status of the audio stream, eg file done
+	//proccess the audio
+	do{
+		status = getSample(Astream);
+		if(status == 0)
+		{
+			int error = gUpdate(Gtmp);
+			if(error != 0)
+			{
+				freeFiles(f_channels,waveHead -> FMTHead -> numChannels);
+				freeWHead(waveHead);
+				fclose(f_out);
+				freeGreg(Gtmp);
+				freeAudio(Astream);
+				fprintf(stdout,"Error writing to tmp file");
+				return EXIT_FAILURE;
+			}
+		}
+	}while(status == 0);
 	
+	//deal with other status exit codes
+	//check to make sure number of sample reads matches expected
+
+	//finalize greg
+	
+	freeFiles(f_channels,waveHead -> FMTHead -> numChannels);
 	freeWHead(waveHead);
-	fclose(file_read);
+	freeAudio(Astream);
+	fclose(f_out);
+	freeGreg(Gtmp);
+	
+}
+
+void freeFiles(FILE** tofree,int channels)
+{
+	for(int i = 0;i < channels;i++)
+	{
+		fclose(tofree[i]);
+	}
+	free(tofree);
+	return;
 }

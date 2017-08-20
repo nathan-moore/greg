@@ -6,7 +6,7 @@
 
 typedef struct samples{
 	uint16_t n;//stores number of channels read from
-	uint32_t* samples;//array of channel's concurrent samples
+	int32_t* samples;//array of channel's concurrent samples
 }samples;
 
 typedef struct audio{
@@ -14,9 +14,12 @@ typedef struct audio{
 	FILE** channels;
 	waveHeaders* headers;
 	uint32_t numSamplesR;//for file integrety checking
+	int* tmp;
 }audio;
 
 samples* aOpen(waveHeaders* head,FILE* channels[],audio** set);
+
+int getSample(audio* ain);
 
 //frees both the samples returned from aOpen and toFree
 //does not close the FILE* channels opened or free array

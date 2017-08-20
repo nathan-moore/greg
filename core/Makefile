@@ -1,9 +1,9 @@
-CFLAGS = -std=c99 -g -Wall -Wshadow --pedantic -Wvla -Werror
+CFLAGS = -g -Wall -Wshadow --pedantic -Wvla -Werror
 COVFLAGS = -fprofile-arcs -ftest-coverage
 PROFFLAG = -pg
-GCC = gcc $(CFLAGS) #$(COVFLAGS) $(PROFFLAG)
-OBJS = headers.o master.o debug.o readAudio.o 
-HEADERS = headers.h debug.h readAudio.h
+GCC = g++ $(CFLAGS) #$(COVFLAGS) $(PROFFLAG)
+OBJS = headers.o master.o debug.o readAudio.o greg.o
+HEADERS = headers.h debug.h readAudio.h greg.h
 
 makeall:$(OBJS)
 

@@ -1,7 +1,7 @@
-CFLAGS = -std=c99 -g -Wall -Wshadow --pedantic -Wvla -Werror
+CFLAGS = -g -Wall -Wshadow --pedantic -Wvla -Werror
 COVFLAGS = -fprofile-arcs -ftest-coverage
 PROFFLAG = -pg
-GCC = gcc $(CFLAGS) #$(COVFLAGS) $(PROFFLAG)
+GCC = g++ $(CFLAGS) #$(COVFLAGS) $(PROFFLAG)
 
 make:clean
 	make -C core makeall
