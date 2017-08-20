@@ -4,33 +4,18 @@
 
 #include "readAudio.h"
 
-samples* aOpen(waveHeaders* head,FILE* channels[],audio** set)
+samples* aOpen(waveHeaders* head,std::vector<FILE*> channels,audio** set)
 {
 	//number of channels
 	uint16_t cNum = head -> FMTHead -> numChannels;
 	
-	audio* toSet = malloc(sizeof(audio));
-	if(toSet == NULL)
-	{
-		return NULL;
-	}
+	audio* toSet = new audio;
 
-	int32_t* rtn = malloc(sizeof(int32_t) * cNum);
-	if(rtn == NULL)
-	{
-		free(toSet);
-		return NULL;
-	}
+	int32_t* rtn = new int32_t[cNum];
 
-	samples* samp = malloc(sizeof(samples));
-	if(rtn == NULL)
-	{
-		free(toSet);
-		free(rtn);
-		return NULL;
-	}
-
-	int * temp = malloc(head -> FMTHead -> bitsPerSample / 8);
+	samples* samp = new samples;
+	
+	int * temp = (int*)malloc(head -> FMTHead -> bitsPerSample / 8);
 	if(temp == NULL)
 	{
 		free(toSet);
@@ -41,7 +26,7 @@ samples* aOpen(waveHeaders* head,FILE* channels[],audio** set)
 	
 	//sets and initializes everything
 	toSet -> headers = head;
-	toSet -> samples = samp;
+	toSet -> sample = samp;
 	toSet -> numSamplesR = 0;
 	toSet -> channels = channels;
 	toSet -> tmp = temp;
@@ -73,7 +58,7 @@ int getSample(audio* ain)
 {
 	//inits temp size of audio bits to read
 	//for every channel
-	for(int i = 0;i < ain -> samples -> n;i++)
+	for(int i = 0;i < ain -> sample -> n;i++)
 	{
 		//reads in the sample
 		size_t read = fread(ain -> tmp,
@@ -88,7 +73,7 @@ int getSample(audio* ain)
 				return 2;
 		}
 		//sample data is stored in program as 32 bit int
-		(ain -> samples -> samples)[i] = (int32_t) *(ain -> tmp);
+		(ain -> sample -> samples)[i] = (int32_t) *(ain -> tmp);
 	}
 
 	//increments count of samples read
@@ -98,8 +83,8 @@ int getSample(audio* ain)
 
 void freeAudio(audio* toFree)
 {
-	free(toFree -> tmp);
-	free(toFree -> samples -> samples);
-	free(toFree -> samples);
-	free(toFree);
+	free (toFree -> tmp);
+	delete [] (toFree -> sample -> samples);
+	delete toFree -> sample;
+	delete toFree;
 }

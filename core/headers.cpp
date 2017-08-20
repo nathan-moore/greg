@@ -19,11 +19,7 @@
 int readRIFF(RIFFHeader** header,FILE* Fin)
 {
 	
-	RIFFHeader* header_first = malloc(sizeof(RIFFHeader));
-	if(header_first == NULL)
-	{
-		return 3;
-	}
+	RIFFHeader* header_first = new RIFFHeader;
 
 	//reads header in
 	size_t error = fread(header_first,sizeof(RIFFHeader),1,Fin);
@@ -53,11 +49,7 @@ int readRIFF(RIFFHeader** header,FILE* Fin)
 //same codes as previous
 int readFMT(FMTHeader** head,FILE* fin)
 {
-	FMTHeader* header = malloc(sizeof(FMTHeader));
-	if(header == NULL)
-	{
-		return 3;
-	}
+	FMTHeader* header = new FMTHeader;
 	
 	size_t error = fread(header,sizeof(FMTHeader),1,fin);
 	if(error != 1)
@@ -94,12 +86,8 @@ int readFMT(FMTHeader** head,FILE* fin)
 //moves the FILE* pointer until the next n chars match the first n chars in match
 int skip(FILE* fin,const char* match,int n)
 {
-	char* read = malloc(sizeof(char) * n);
-	if(read == NULL)
-	{
-		return 1;
-	}
-
+	char* read = new char[n];
+	
 	size_t error = fread(read,sizeof(char),n,fin);
 	if(error != n)
 	{
@@ -117,12 +105,12 @@ int skip(FILE* fin,const char* match,int n)
 		error = fread(&read[n - 1],sizeof(char),1,fin);
 		if(error != 1)
 		{
-			free(read);
+			delete[] read;
 			return 2;
 		}
 	}
 
-	free(read);
+	delete[] read;
 	
 	error = (size_t)fseek(fin,-n * sizeof(char),SEEK_CUR);
 	if(error != 0)
@@ -137,16 +125,12 @@ int skip(FILE* fin,const char* match,int n)
 //Same error codes as above
 int readData(dataHeader** head,FILE* fin)
 {
-	dataHeader* tmp = malloc(sizeof(dataHeader));
-	if(tmp == NULL)
-	{
-		return 3;
-	}
+	dataHeader* tmp = new dataHeader;
 
 	size_t error = fread(tmp,sizeof(dataHeader),1,fin);
 	if(error != 1)
 	{
-		free(tmp);
+		delete tmp;
 		return 2;
 	}
 
@@ -161,11 +145,7 @@ int readData(dataHeader** head,FILE* fin)
 
 waveHeaders* initWHead()
 {
-	waveHeaders* rtn = malloc(sizeof(waveHeaders));
-	if(rtn == NULL)
-	{
-		return NULL;
-	}
+	waveHeaders* rtn = new waveHeaders;
 
 	rtn -> RIFFHead = NULL;
 	rtn -> FMTHead = NULL;
@@ -184,20 +164,20 @@ void freeWHead(waveHeaders* head)
 	
 	if(head -> RIFFHead != NULL)
 	{
-		free(head -> RIFFHead);
+		delete head -> RIFFHead;
 	}
 	
 	if(head -> FMTHead != NULL)
 	{
-		free(head -> FMTHead);
+		delete head -> FMTHead;
 	}
 	
 	if(head -> dataHead != NULL)
 	{
-		free(head -> dataHead);
+		delete head -> dataHead;
 	}
 
-	free(head);
+	delete head;
 	
 	return;
 }

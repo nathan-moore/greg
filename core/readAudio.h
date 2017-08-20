@@ -2,6 +2,7 @@
 #define readheader
 
 #include <stdint.h>
+#include <vector>
 #include "headers.h"
 
 typedef struct samples{
@@ -10,14 +11,14 @@ typedef struct samples{
 }samples;
 
 typedef struct audio{
-	samples* samples;
-	FILE** channels;
+	samples* sample;
+	std::vector<FILE*> channels;
 	waveHeaders* headers;
 	uint32_t numSamplesR;//for file integrety checking
 	int* tmp;
 }audio;
 
-samples* aOpen(waveHeaders* head,FILE* channels[],audio** set);
+samples* aOpen(waveHeaders* head,std::vector<FILE*> channels,audio** set);
 
 int getSample(audio* ain);
 

@@ -38,7 +38,7 @@ typedef struct waveHeaders{
 
 
 //reads all wavefile format headers
-waveHeaders* readWHeaders();
+waveHeaders* readWHeaders(FILE* fin);
 
 //reads in their respective header. If it reads the header in, it sets
 //*header/head to the header. Then returns 0 if the header matches basic

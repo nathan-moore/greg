@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <vector>
 
 #include "headers.h"
 #include "debug.h"
@@ -9,7 +10,7 @@
 
 #define DEBUG 1
 
-void freeFiles(FILE** tofree,int channels);
+void freeFiles(std::vector<FILE*> tofree);
 
 int main(int argc,char** argv)
 {
@@ -62,18 +63,11 @@ int main(int argc,char** argv)
 
 	//opens up a file stream for each channel
 	//allocates the containing array
-	FILE** f_channels = malloc(sizeof(FILE*) * (waveHead -> FMTHead -> numChannels));
-	if(f_channels == NULL)
-	{
-		freeWHead(waveHead);
-		fclose(file_read);
-		fclose(f_out);
-		fprintf(stdout,"Error opening channel data\n");
-		return EXIT_FAILURE;
-	}
-
+	//FILE** f_channels = new FILE*[waveHead -> FMTHead -> numChannels];
+	std::vector<FILE*> f_channels(waveHead -> FMTHead -> numChannels);
+	
 	//opens channel - 1 streams and stores them
-	for(int i = 0,limit = waveHead -> FMTHead -> numChannels - 1;i < limit;i++)
+	for(int i = 0,limit = f_channels.size() - 1;i < limit;i++)
 	{
 		f_channels[i] = fopen(argv[1],"r");
 		if(f_channels[i] == NULL)
@@ -88,7 +82,6 @@ int main(int argc,char** argv)
 			fprintf(stderr,"errno error: %i\n",error);
 			fclose(file_read);\
 			fclose(f_out);
-			free(f_channels);
 			freeWHead(waveHead);
 			return EXIT_FAILURE;
 		}
@@ -101,7 +94,7 @@ int main(int argc,char** argv)
 	samples* dataIn = aOpen(waveHead,f_channels,&Astream);
 	if(dataIn == NULL)
 	{
-		freeFiles(f_channels,waveHead -> FMTHead -> numChannels);
+		freeFiles(f_channels);
 		freeWHead(waveHead);
 		fclose(f_out);
 		fprintf(stdout,"error opening audio data\n");
@@ -111,7 +104,7 @@ int main(int argc,char** argv)
 	greg* Gtmp = initGreg(dataIn);
 	if(Gtmp == NULL)
 	{
-		freeFiles(f_channels,waveHead -> FMTHead -> numChannels);
+		freeFiles(f_channels);
 		freeWHead(waveHead);
 		fclose(f_out);
 		freeAudio(Astream);
@@ -128,7 +121,7 @@ int main(int argc,char** argv)
 			int error = gUpdate(Gtmp);
 			if(error != 0)
 			{
-				freeFiles(f_channels,waveHead -> FMTHead -> numChannels);
+				freeFiles(f_channels);
 				freeWHead(waveHead);
 				fclose(f_out);
 				freeGreg(Gtmp);
@@ -144,7 +137,7 @@ int main(int argc,char** argv)
 
 	//finalize greg
 	
-	freeFiles(f_channels,waveHead -> FMTHead -> numChannels);
+	freeFiles(f_channels);
 	freeWHead(waveHead);
 	freeAudio(Astream);
 	fclose(f_out);
@@ -152,12 +145,13 @@ int main(int argc,char** argv)
 	
 }
 
-void freeFiles(FILE** tofree,int channels)
+
+void freeFiles(std::vector<FILE*> tofree)
 {
-	for(int i = 0;i < channels;i++)
+	for(int i = 0;i < tofree.size();i++)
 	{
 		fclose(tofree[i]);
 	}
-	free(tofree);
 	return;
 }
+

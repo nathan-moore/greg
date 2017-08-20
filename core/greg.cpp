@@ -7,7 +7,7 @@
 
 greg* initGreg(samples* in)
 {
-	greg* rtn = malloc(sizeof(greg));
+	greg* rtn = new greg;
 	if(rtn == NULL)
 	{
 		return NULL;
@@ -49,5 +49,5 @@ int gUpdate(greg* g)
 void freeGreg(greg* toFree)
 {
 	fclose(toFree -> tmp);
-	free(toFree);
+	delete toFree;
 }
