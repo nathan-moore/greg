@@ -1,4 +1,4 @@
-CFLAGS = -g -Wall -Wshadow --pedantic -Wvla -Werror
+CXXFLAGS = -g -Wall -Wshadow  -Wvla -Werror #--pedantic
 COVFLAGS = -fprofile-arcs -ftest-coverage
 PROFFLAG = -pg
 GCC = g++ $(CFLAGS) #$(COVFLAGS) $(PROFFLAG)

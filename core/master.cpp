@@ -1,7 +1,9 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <errno.h>
+
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 #include "headers.h"
 #include "debug.h"
@@ -10,38 +12,42 @@
 
 #define DEBUG 1
 
-void freeFiles(std::vector<FILE*> tofree);
+void freeFiles(std::vector<std::ifstream> tofree);
 
 int main(int argc,char** argv)
 {
 	if(argc != 3)
 	{
 		fprintf(stdout,"Error, please use ./function fileIn.wav fileOut.greg\n");
+		return EXIT_FAILURE;
 	}
 
-	FILE* file_read = fopen(argv[1],"r");
-	if(file_read == NULL)
+	std::ifstream file_read;
+	file_read.open(argv[1],std::ios::binary);
+	if(file_read.is_open() != true)
 	{
 	    int error = errno;
 		fprintf(stderr,"Error opening file. Error %i\n",error);
 		return EXIT_FAILURE;
 	}
 
-	FILE* f_out = fopen(argv[2],"w");
-	if(f_out == NULL)
+	
+	std::ifstream f_out;
+	f_out.open(argv[2],std::ios::binary);
+	if(f_out.is_open() != true)
 	{
 		int error = errno;
-		fclose(file_read);
+		file_read.close();
 		fprintf(stderr,"Error opeing file. Error: %i\n",error);
 		return EXIT_FAILURE;
 	}
 	
 	//reads three headers in and does simple header validation
-	waveHeaders* waveHead = readWHeaders(file_read);
+	waveHeaders* waveHead = readWHeaders(&file_read);
 	if(waveHead == NULL)
 	{
-		fclose(file_read);
-		fclose(f_out);
+		file_read.close();
+		f_out.close();
 		return EXIT_FAILURE;
 	}
 
@@ -52,11 +58,11 @@ int main(int argc,char** argv)
 		printData(waveHead -> dataHead);
 	}
 
-	if(!validateHeads(waveHead,file_read))
+	if(!validateHeads(waveHead,&file_read))
 	{
 		freeWHead(waveHead);
-		fclose(file_read);
-		fclose(f_out);
+		file_read.close();
+		f_out.close();
 		fprintf(stdout,"Error parsing file\n");
 		return EXIT_FAILURE;
 	}
@@ -64,24 +70,24 @@ int main(int argc,char** argv)
 	//opens up a file stream for each channel
 	//allocates the containing array
 	//FILE** f_channels = new FILE*[waveHead -> FMTHead -> numChannels];
-	std::vector<FILE*> f_channels(waveHead -> FMTHead -> numChannels);
+	std::vector<std::ifstream> f_channels(waveHead -> FMTHead -> numChannels);
 	
 	//opens channel - 1 streams and stores them
 	for(int i = 0,limit = f_channels.size() - 1;i < limit;i++)
 	{
-		f_channels[i] = fopen(argv[1],"r");
+		f_channels[i].open(argv[1],std::ios::binary);
 		if(f_channels[i] == NULL)
 		{
 			//gets why the file open would have failed
 			int error = errno;
 			for(int j = 0;j < i;j++)
 			{
-				fclose(f_channels[i]);
+				f_channels[i].close();
 			}
 			fprintf(stdout,"Error opening channel data\n");
 			fprintf(stderr,"errno error: %i\n",error);
-			fclose(file_read);\
-			fclose(f_out);
+			file_read.close();
+			f_out.close();
 			freeWHead(waveHead);
 			return EXIT_FAILURE;
 		}
@@ -96,7 +102,7 @@ int main(int argc,char** argv)
 	{
 		freeFiles(f_channels);
 		freeWHead(waveHead);
-		fclose(f_out);
+		f_out.close();
 		fprintf(stdout,"error opening audio data\n");
 		return EXIT_FAILURE;
 	}
@@ -106,7 +112,7 @@ int main(int argc,char** argv)
 	{
 		freeFiles(f_channels);
 		freeWHead(waveHead);
-		fclose(f_out);
+		f_out.close();
 		freeAudio(Astream);
 		fprintf(stdout,"error converting to .greg\n");
 		return EXIT_FAILURE;
@@ -123,7 +129,7 @@ int main(int argc,char** argv)
 			{
 				freeFiles(f_channels);
 				freeWHead(waveHead);
-				fclose(f_out);
+				f_out.close();
 				freeGreg(Gtmp);
 				freeAudio(Astream);
 				fprintf(stdout,"Error writing to tmp file");
@@ -132,25 +138,36 @@ int main(int argc,char** argv)
 		}
 	}while(status == 0);
 	
-	//deal with other status exit codes
-	//check to make sure number of sample reads matches expected
+	if(status != 1)
+	{
+		std::cout << "Error reading file" << std::endl;
+	}
 
-	//finalize greg
+    status = finalize(Gtmp,&f_out,waveHead);
+	if(status != 0)
+	{
+		freeFiles(f_channels);
+		freeWHead(waveHead);
+		freeAudio(Astream);
+		f_out.close();
+		freeGreg(Gtmp);
+	    return EXIT_FAILURE;
+	}
 	
 	freeFiles(f_channels);
 	freeWHead(waveHead);
 	freeAudio(Astream);
-	fclose(f_out);
+	f_out.close();
 	freeGreg(Gtmp);
-	
+	return EXIT_SUCCESS;
 }
 
 
-void freeFiles(std::vector<FILE*> tofree)
+void freeFiles(std::vector<std::ifstream> tofree)
 {
-	for(int i = 0;i < tofree.size();i++)
+	for(unsigned int i = 0;i < tofree.size();i++)
 	{
-		fclose(tofree[i]);
+		tofree[i].close();
 	}
 	return;
 }

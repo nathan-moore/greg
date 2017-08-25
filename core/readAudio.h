@@ -12,13 +12,13 @@ typedef struct samples{
 
 typedef struct audio{
 	samples* sample;
-	std::vector<FILE*> channels;
+	std::vector<std::ifstream> channels;
 	waveHeaders* headers;
 	uint32_t numSamplesR;//for file integrety checking
 	int* tmp;
 }audio;
 
-samples* aOpen(waveHeaders* head,std::vector<FILE*> channels,audio** set);
+samples* aOpen(waveHeaders* head,std::vector<std::ifstream> channels,audio** set);
 
 int getSample(audio* ain);
 

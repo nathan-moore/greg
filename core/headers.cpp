@@ -84,7 +84,7 @@ int readFMT(FMTHeader** head,FILE* fin)
 }
 
 //moves the FILE* pointer until the next n chars match the first n chars in match
-int skip(FILE* fin,const char* match,int n)
+int skip(FILE* fin,char const* match,unsigned int n)
 {
 	char* read = new char[n];
 	
@@ -97,7 +97,7 @@ int skip(FILE* fin,const char* match,int n)
 
 	while(strncmp(match,read,n) != 0)
 	{
-		for(int i = 1;i < n;i++)
+		for(unsigned int i = 1;i < n;i++)
 		{
 			read[i - 1] = read[i];
 		}
