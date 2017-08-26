@@ -1,8 +1,9 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
+
+#include <fstream>
 
 #include "headers.h"
 
@@ -16,19 +17,14 @@
  *In the case of a header mismatch, the header is set.
  */
 
-int readRIFF(RIFFHeader** header,FILE* Fin)
+int readRIFF(RIFFHeader** header,std::ifstream& Fin)
 {
 	
 	RIFFHeader* header_first = new RIFFHeader;
 
 	//reads header in
-	size_t error = fread(header_first,sizeof(RIFFHeader),1,Fin);
-	if (error != 1)
-	{
-		free(header_first);
-		fprintf(stdout,"Error reading from file\n");
-		return 2;
-	}
+	//size_t error = fread(header_first,sizeof(RIFFHeader),1,Fin);
+	Fin.read((char*)header_first,sizeof(RIFFHeader));
 	
 	//sets header to header, checks for any mismatches
 	*header = header_first;
@@ -47,11 +43,13 @@ int readRIFF(RIFFHeader** header,FILE* Fin)
 
 
 //same codes as previous
-int readFMT(FMTHeader** head,FILE* fin)
+int readFMT(FMTHeader** head,std::ifstream& fin)
 {
 	FMTHeader* header = new FMTHeader;
 	
-	size_t error = fread(header,sizeof(FMTHeader),1,fin);
+	//size_t error = fread(header,sizeof(FMTHeader),1,fin);
+	fin.read((char*) header,sizeof(FMTHeader);
+	/**
 	if(error != 1)
 	{
 		fprintf(stdout,"error reading from file\n");
@@ -59,6 +57,7 @@ int readFMT(FMTHeader** head,FILE* fin)
 		free(header);
 		return 2;
 	}
+	**/
 
 	*head = header;
 	
@@ -84,17 +83,20 @@ int readFMT(FMTHeader** head,FILE* fin)
 }
 
 //moves the FILE* pointer until the next n chars match the first n chars in match
-int skip(FILE* fin,char const* match,unsigned int n)
+		int skip(std::ifstream& fin,char const* match,unsigned int n)
 {
 	char* read = new char[n];
 	
-	size_t error = fread(read,sizeof(char),n,fin);
-	if(error != n)
+	//size_t error = fread(read,sizeof(char),n,fin);
+	fin.read(read,sizeof(char) * n);
+	
+	if(fin.bad = true)
 	{
-		free(read);
+		delete[] read;
 		return 2;
 	}
-
+	
+	
 	while(strncmp(match,read,n) != 0)
 	{
 		for(unsigned int i = 1;i < n;i++)
@@ -102,8 +104,8 @@ int skip(FILE* fin,char const* match,unsigned int n)
 			read[i - 1] = read[i];
 		}
 
-		error = fread(&read[n - 1],sizeof(char),1,fin);
-		if(error != 1)
+		fin.read(&read[n - 1],sizeof(char));
+		if(fin.bad() == true)
 		{
 			delete[] read;
 			return 2;
@@ -112,8 +114,9 @@ int skip(FILE* fin,char const* match,unsigned int n)
 
 	delete[] read;
 	
-	error = (size_t)fseek(fin,-n * sizeof(char),SEEK_CUR);
-	if(error != 0)
+	//error = (size_t)fseek(fin,-n * sizeof(char),SEEK_CUR);
+	fin.seegk(-n * sizeof(char),std::ios_base::beg);
+	if(fin.bad() == true)
 	{
 		return 2;
 	}
@@ -123,17 +126,19 @@ int skip(FILE* fin,char const* match,unsigned int n)
 
 //reads in Data header form fin and stores it in *head.
 //Same error codes as above
-int readData(dataHeader** head,FILE* fin)
+int readData(dataHeader** head,std::ifstream& fin)
 {
 	dataHeader* tmp = new dataHeader;
 
-	size_t error = fread(tmp,sizeof(dataHeader),1,fin);
-	if(error != 1)
+	//size_t error = fread(tmp,sizeof(dataHeader),1,fin);
+	fin.read((char*) tmp,sizeof(dataHeader));
+	if(fin.bad() == true)
 	{
 		delete tmp;
 		return 2;
 	}
 
+	//if read is successful, we return the data header
 	*head = tmp;
 	if(strncmp((char*)&(tmp -> subChunk2ID),"data",4) != 0)
 	{
@@ -183,7 +188,7 @@ void freeWHead(waveHeaders* head)
 }
 
 //reads the RIFF,FMT,and data headers and skips over any header besides those 3
-waveHeaders* readWHeaders(FILE* fin)
+waveHeaders* readWHeaders(std::ifstream fin)
 {
 	waveHeaders* waveHead = initWHead();
 	if(waveHead == NULL)
@@ -195,7 +200,8 @@ waveHeaders* readWHeaders(FILE* fin)
 	int error = readRIFF(&(waveHead -> RIFFHead),fin);
 	if(error != 0)
 	{
-		fprintf(stderr,"The error code for RIFF is %i\n",error);
+		//fprintf(stderr,"The error code for RIFF is %i\n",error);
+		cerr << "The error code for RIFF is" << error << std:endl;
 		freeWHead(waveHead);
 		return NULL;
 	}

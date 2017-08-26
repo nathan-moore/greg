@@ -10,19 +10,22 @@ typedef struct samples{
 	int32_t* samples;//array of channel's concurrent samples
 }samples;
 
-typedef struct audio{
-	samples* sample;
-	std::vector<std::ifstream> channels;
-	waveHeaders* headers;
-	uint32_t numSamplesR;//for file integrety checking
-	int* tmp;
-}audio;
-
-samples* aOpen(waveHeaders* head,std::vector<std::ifstream> channels,audio** set);
-
-int getSample(audio* ain);
-
+class audio{
+private:
+		samples* sample;
+		std::ifstream* channels;
+		waveHeaders* headers;
+		uint32_t numSamplesR;//for file integrety checking
+		int* tmp;
+		struct bad_alloc{};
+		unsigned int channelsN;
+public:
+		audio(waveHeaders* head,std::ifstream* channels,samples** set);
+	int getSample();
+	
 //frees both the samples returned from aOpen and toFree
 //does not close the FILE* channels opened or free array
-void freeAudio(audio* toFree);
+	~audio();
+};
+
 #endif

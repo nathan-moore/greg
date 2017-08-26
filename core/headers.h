@@ -54,17 +54,16 @@ typedef struct PACKED gregHeader{
 }gregHeader;
 	
 //reads all wavefile format headers
-waveHeaders* readWHeaders(std::ifstream* fin);
+waveHeaders* readWHeaders(std::ifstream& fin);
 
 //reads in their respective header. If it reads the header in, it sets
 //*header/head to the header. Then returns 0 if the header matches basic
 //header marchings, 1 if not
-int readRIFF(RIFFHeader** header,std::ifstream* Fin);
-int readFMT(FMTHeader** header,std::ifstream* fin);
-int readData(dataHeader** head,std::ifstream* fin);
+int readRIFF(RIFFHeader** header,std::ifstream& in);
+int readData(dataHeader** head,std::ifstream& fin);
 
 //skips the data stream fin until the next n chars read match match
-int skip(std::ifstream* fin, char const* match,unsigned int n);
+int skip(std::ifstream& fin, char const* match,unsigned int n);
 
 //initiates struct to hold all the headers
 waveHeaders* initWHead();
@@ -73,7 +72,7 @@ waveHeaders* initWHead();
 void freeWHead(waveHeaders* head);
 
 //returns true if correctly formated
-bool validateHeads(waveHeaders* head,std::ifstream* fin);
+bool validateHeads(waveHeaders* head,std::ifstream& fin);
 
 
 

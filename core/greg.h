@@ -10,16 +10,16 @@
 
 class greg{
 public:
-	std::FILE* tmp;
+	std::fstream tmp;
 	samples* in;
 	int32_t prev;
 
 	greg(samples* in);
 	
-	int gUpdate(greg* g);
-	void freeGreg(greg* toFree);
+	int gUpdate();
 	gregHeader* initGHead(waveHeaders* in);
-	int finalize(greg* g,std::ifstream* fout,waveHeaders* in);
+	int finalize(std::ofstream& fout,waveHeaders* WIn);
+	~greg();
 };
 
 
